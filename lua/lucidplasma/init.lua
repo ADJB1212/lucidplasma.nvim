@@ -18,11 +18,12 @@ M.colors = {
 
     red               = '#f66575',
     orange            = '#eb7d57',
-    yellow            = '#ffcb6b',
+    yellow            = '#ffcf75',
     green             = '#b8e9a4',
     cyan              = '#86c4ff',
     blue              = '#82aaff',
     paleblue          = '#b2ccd6',
+    softblue          = '#89dceb',
     purple            = '#D49BFD',
     brown             = '#c17e70',
     pink              = '#f07178',
@@ -231,13 +232,15 @@ function M.configure_highlights(overrides, transparent)
 
         LazyNormal                       = { bg = c.background_darker },
 
+        LazyProgressDone                 = { fg = c.purple, bold = true },
+
         LirDir                           = { fg = c.blue },
         LirEmptyDirText                  = { bg = c.highlight },
         CursorLineLir                    = { bg = c.highlight },
 
-        NoiceCmdlinePopup                = { bg = c.background_darker },
+        NoiceCmdlinePopup                = { bg = 'NONE' },
         NoiceCmdlineIcon                 = { fg = c.purple },
-        NoiceCmdlinePopupBorder          = { fg = c.purple },
+        NoiceCmdlinePopupBorder          = { fg = c.softblue },
         NoiceMini                        = { bg = c.background_darker },
 
         LuasnipChoice                    = { fg = c.orange },
@@ -296,6 +299,8 @@ function M.configure_highlights(overrides, transparent)
         BlinkCmpDocBorder                = { link = "BlinkCmpMenuBorder" },
         BlinkCmpSignatureHelpBorder      = { link = "BlinkCmpMenuBorder" },
 
+        BlinkCmpLabelDeprecated          = { fg = c.foreground_darker, strikethrough = true },
+
         BlinkCmpKind                     = { fg = c.blue },
         BlinkCmpKindText                 = { fg = c.comments },
         BlinkCmpKindMethod               = { fg = c.blue },
@@ -320,23 +325,19 @@ function M.configure_highlights(overrides, transparent)
         BlinkCmpKindCopilot              = { fg = c.dark_blue },
         BlinkCmpKindColor                = { fg = c.red },
 
-        MasonHeader                      = { fg = c.foreground },
-        MasonHeaderSecondary             = { fg = c.foreground_darker, bg = c.background_darker },
-
+        MasonHeader                      = { fg = 'NONE', bg = 'NONE', bold = true },
+        MasonHeaderSecondary             = { fg = c.foreground_darker, bg = c.background_darker, bold = true },
         MasonHighlight                   = { fg = c.green },
-        MasonHighlightBlock              = {
-            bg = c.green,
-            fg = c.paleblue,
-        },
+        MasonHighlightBlock              = { fg = c.paleblue, bg = c.green },
         MasonHighlightBlockBold          = { bg = c.background_darker, fg = c.foreground_darker, bold = true },
-
         MasonHighlightSecondary          = { fg = c.purple },
         MasonHighlightBlockSecondary     = { fg = c.foreground_darker, bg = c.background_darker },
         MasonHighlightBlockBoldSecondary = { fg = c.foreground, bg = c.background, bold = true },
-
         MasonError                       = { fg = c.red },
-
         MasonHeading                     = { fg = c.purple, bold = true },
+
+        MiniIndentscopeSymbol            = { fg = c.blue, nocombine = true },
+        MiniIndentscopePrefix            = { nocombine = true },
     }
 
     M.highlights = vim.tbl_deep_extend('force', default_highlights, overrides or {})
@@ -346,7 +347,7 @@ function M.setup(opts)
     opts = opts or {}
 
     if vim.g.colors_name then
-        vim.cmd [[hi clear]]
+        vim.cmd("hi clear")
     end
 
     vim.o.termguicolors = true
