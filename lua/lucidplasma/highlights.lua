@@ -4,9 +4,6 @@ function H.highlight(group, colors)
     local style = {}
 
     if colors.style ~= nil then
-        vim.api.nvim_echo({ { '[lucidplasma.nvim] "style" field is deprecated. Use boolean fields instead' } }, true,
-            {})
-
         colors.style = nil
         style = {
             bold = colors.style == 'bold',
