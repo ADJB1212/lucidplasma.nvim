@@ -338,6 +338,23 @@ function M.configure_highlights(overrides, transparent)
 
         MiniIndentscopeSymbol            = { fg = c.blue, nocombine = true },
         MiniIndentscopePrefix            = { nocombine = true },
+
+        FzfLuaBorder                     = { fg = c.blue },
+        FzfLuaTitle                      = { fg = c.blue },
+        FzfLuaHeaderBind                 = { fg = c.yellow },
+        FzfLuaHeaderText                 = { fg = c.orange },
+        FzfLuaDirPart                    = { link = "NonText" },
+        FzfLuaFzfMatch                   = { fg = c.blue },
+        FzfLuaFzfPrompt                  = { fg = c.blue },
+        FzfLuaPathColNr                  = { fg = c.blue },
+        FzfLuaPathLineNr                 = { fg = c.green },
+        FzfLuaBufName                    = { fg = c.purple },
+        FzfLuaBufNr                      = { fg = c.yellow },
+        FzfLuaBufFlagCur                 = { fg = c.orange },
+        FzfLuaBufFlagAlt                 = { fg = c.blue },
+        FzfLuaTabTitle                   = { fg = c.paleblue },
+        FzfLuaTabMarker                  = { fg = c.yellow },
+        FzfLuaLiveSym                    = { fg = c.orange },
     }
 
     M.highlights = vim.tbl_deep_extend('force', default_highlights, overrides or {})
