@@ -137,17 +137,6 @@ function M.configure_highlights(overrides, transparent)
         ['@text.emphasis']               = { italic = true },
         ['@type.qualifier']              = { link = 'Keyword' },
 
-        TSConstructor                    = { fg = c.yellow },
-        TSTag                            = { fg = c.yellow },
-        TSTagDelimiter                   = { fg = c.foreground_darker },
-        TSVariableBuiltin                = { fg = c.orange },
-        TSVariable                       = { fg = c.foreground },
-        TSKeywordOperator                = { fg = c.purple },
-        TSConstBuiltin                   = { fg = c.orange },
-        TSFuncBuiltin                    = { fg = c.blue },
-        TSLiteral                        = { fg = c.foreground_darker },
-        TSNote                           = { fg = c.cyan },
-
         markdownCode                     = { fg = c.foreground_darker },
         markdownCodeDelimiter            = { fg = c.foreground_darker },
 
@@ -282,7 +271,7 @@ function M.configure_highlights(overrides, transparent)
         RainbowDelimiterBlue             = { fg = c.blue },
         RainbowDelimiterOrange           = { fg = c.orange },
         RainbowDelimiterGreen            = { fg = c.green },
-        RainbowDelimiterViolet           = { fg = c.purple },
+        RainbowDelimiterPurple           = { fg = c.purple },
         RainbowDelimiterCyan             = { fg = c.cyan },
 
         IblIndent                        = { fg = c.disabled },
