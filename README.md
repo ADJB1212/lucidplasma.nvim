@@ -1,4 +1,10 @@
-Install with Lazy.nvim:
+# LucidPlasma
+
+![LucidPlasma Screenshot](./screenshot.png)
+
+## Installation
+
+lazy.nvim:
 
 ```lua
 'ADJB1212/lucidplasma.nvim',
@@ -8,3 +14,10 @@ config = function()
   vim.cmd.colorscheme "lucidplasma"
 end
 ```
+
+## Inspiration
+
+This theme was heavily inspired by the following:
+
+- [tokyonight.nvim](https://github.com/folke/tokyonight.nvim)
+- [palenightfall.nvim](https://github.com/JoosepAlviste/palenightfall.nvim)

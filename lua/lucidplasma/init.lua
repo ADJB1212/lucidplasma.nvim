@@ -4,7 +4,7 @@ local M = {}
 
 M.colors = {
     background        = '#292D3E',
-    foreground        = '#a6accd',
+    foreground        = '#c0caf5',
 
     background_darker = '#232534',
     highlight         = '#2b2f40',
@@ -13,7 +13,7 @@ M.colors = {
     statusline        = '#1d1f2b',
     foreground_darker = '#7982b4',
     line_numbers      = '#4e5579',
-    comments          = '#676e95',
+    comments          = '#565f89',
     disabled          = "#474747",
 
     red               = '#f66575',
@@ -21,7 +21,7 @@ M.colors = {
     yellow            = '#ffcf75',
     green             = '#b8e9a4',
     cyan              = '#86c4ff',
-    blue              = '#82aaff',
+    blue              = '#2ac3de',
     paleblue          = '#b2ccd6',
     softblue          = '#89dceb',
     purple            = '#D49BFD',
@@ -220,7 +220,6 @@ function M.configure_highlights(overrides, transparent)
         NotifyBackground                 = { bg = c.background },
 
         LazyNormal                       = { bg = c.background_darker },
-
         LazyProgressDone                 = { fg = c.purple, bold = true },
 
         LirDir                           = { fg = c.blue },
@@ -281,6 +280,7 @@ function M.configure_highlights(overrides, transparent)
         BlinkCmpMenuBorder               = { fg = c.background_darker, bg = c.background },
         BlinkCmpMenuSelection            = { bg = c.selection },
         BlinkCmpLabel                    = { fg = c.foreground },
+        BlinkCmpGhostText                = { fg = '#414868' },
         BlinkCmpLabelMatch               = { fg = c.orange, bold = true },
         BlinkCmpLabelDetail              = { link = "BlinkCmpLabel" },
         BlinkCmpLabelDescription         = { link = "BlinkCmpLabel" },
@@ -333,6 +333,7 @@ function M.configure_highlights(overrides, transparent)
         FzfLuaHeaderBind                 = { fg = c.yellow },
         FzfLuaHeaderText                 = { fg = c.orange },
         FzfLuaDirPart                    = { link = "NonText" },
+        FzfLuaFzfPointer                 = { fg = c.purple },
         FzfLuaFzfMatch                   = { fg = c.blue },
         FzfLuaFzfPrompt                  = { fg = c.blue },
         FzfLuaPathColNr                  = { fg = c.blue },
@@ -344,6 +345,10 @@ function M.configure_highlights(overrides, transparent)
         FzfLuaTabTitle                   = { fg = c.paleblue },
         FzfLuaTabMarker                  = { fg = c.yellow },
         FzfLuaLiveSym                    = { fg = c.orange },
+
+        TroubleText                      = { fg = c.foreground_darker },
+        TroubleCount                     = { fg = c.purple },
+        TroubleNormal                    = { fg = c.foreground },
     }
 
     M.highlights = vim.tbl_deep_extend('force', default_highlights, overrides or {})
