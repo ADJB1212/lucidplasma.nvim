@@ -1,17 +1,50 @@
-local highlight = require('lucidplasma.highlights').highlight
+local plugin_loader = require('lucidplasma.plugin_loader')
 
 local M = {}
+
+-- Highlight function (moved from highlights.lua)
+local function highlight(group, colors)
+    local style = {}
+
+    if colors.style ~= nil then
+        colors.style = nil
+        style = {
+            bold = colors.style == 'bold',
+            standout = colors.style == 'standout',
+            underline = colors.style == 'underline',
+            undercurl = colors.style == 'undercurl',
+            underdouble = colors.style == 'underdouble',
+            underdotted = colors.style == 'underdotted',
+            underdashed = colors.style == 'underdashed',
+            strikethrough = colors.style == 'strikethrough',
+            italic = colors.style == 'italic',
+            reverse = colors.style == 'reverse',
+            nocombine = colors.style == 'nocombine',
+        }
+    end
+
+    vim.api.nvim_set_hl(
+        0,
+        group,
+        vim.tbl_extend('force', style, colors, {
+            fg = colors.fg or 'NONE',
+            bg = colors.bg or 'NONE',
+            sp = colors.sp or 'NONE',
+        })
+    )
+end
+
 
 M.colors = {
     background        = '#292D3E',
     foreground        = '#c0caf5',
 
+    foreground_darker = '#7982b4',
     background_darker = '#232534',
     highlight         = '#2b2f40',
     references        = '#2e2e41',
     selection         = '#343A51',
     statusline        = '#1d1f2b',
-    foreground_darker = '#7982b4',
     line_numbers      = '#4e5579',
     comments          = '#565f89',
     disabled          = "#474747",
@@ -41,10 +74,12 @@ end
 
 M.highlights = nil
 
-function M.configure_highlights(overrides, transparent)
+function M.configure_highlights(overrides, transparent, enabled_plugins)
     local c = M.colors
 
-    local default_highlights = {
+    -- Core Neovim highlights
+    local core_highlights = {
+        -- Line numbers and cursor
         LineNr                           = { fg = c.line_numbers },
         CursorLine                       = { bg = c.background_darker },
         CursorLineNr                     = { fg = c.foreground_darker },
@@ -52,10 +87,14 @@ function M.configure_highlights(overrides, transparent)
         Cursor                           = { fg = c.background, bg = c.blue },
         TermCursor                       = { fg = c.background, bg = c.blue },
         ColorColumn                      = { bg = c.background_darker },
+
+        -- Search and selection
         Search                           = { bg = c.highlight },
         IncSearch                        = { bg = c.highlight },
         Visual                           = { bg = c.selection },
         MatchParen                       = { bg = c.references },
+
+        -- UI elements
         SignColumn                       = { bg = 'NONE' },
         FoldColumn                       = { fg = c.line_numbers, bg = 'NONE' },
         Folded                           = { fg = c.comments, bg = c.background_darker },
@@ -65,12 +104,16 @@ function M.configure_highlights(overrides, transparent)
         TabLine                          = { fg = c.foreground, bg = c.statusline },
         TabLineFill                      = { fg = c.foreground, bg = c.statusline },
         TabLineSel                       = { fg = c.foreground, bg = c.background },
+
+        -- Popups and menus
         PMenu                            = { bg = c.background_darker },
         PMenuSBar                        = { bg = c.background_darker },
         PMenuThumb                       = { bg = c.background },
         PMenuSel                         = { bg = c.highlight },
         NormalFloat                      = { bg = c.background_darker },
         FloatBorder                      = { fg = c.background_darker, bg = c.background_darker },
+
+        -- Messages and errors
         Question                         = { fg = c.green },
         MoreMsg                          = { fg = c.green },
         Error                            = { fg = c.red },
@@ -80,6 +123,7 @@ function M.configure_highlights(overrides, transparent)
         Directory                        = { fg = c.blue },
         Conceal                          = { fg = c.brown },
 
+        -- Basic syntax highlighting
         Normal                           = { fg = c.foreground, bg = transparent and 'NONE' or c.background },
         Identifier                       = { fg = c.foreground },
         Comment                          = { fg = c.comments, italic = true },
@@ -100,6 +144,8 @@ function M.configure_highlights(overrides, transparent)
         Title                            = { fg = c.yellow },
         Type                             = { fg = c.yellow },
         Tag                              = { fg = c.yellow },
+
+        -- Spell checking
         SpellBad                         = { undercurl = true, sp = c.orange },
         SpellCap                         = { undercurl = true, sp = c.blue },
         SpellRare                        = { undercurl = true, sp = c.violet },
@@ -107,6 +153,7 @@ function M.configure_highlights(overrides, transparent)
         Noise                            = { fg = c.cyan },
         SpecialKey                       = { fg = c.line_numbers },
 
+        -- LSP diagnostics
         DiagnosticError                  = { fg = c.red },
         DiagnosticUnderlineError         = { fg = 'NONE', undercurl = true, sp = c.red },
         DiagnosticWarn                   = { fg = c.orange },
@@ -121,6 +168,7 @@ function M.configure_highlights(overrides, transparent)
         LspDiagnosticsVirtualTextError   = { fg = '#9e4057' },
         LspDiagnosticsVirtualTextWarning = { fg = '#9a6054' },
 
+        -- Treesitter
         ['@constructor']                 = { link = 'Type' },
         ['@tag']                         = { link = 'Tag' },
         ['@tag.delimiter']               = { fg = c.foreground_darker },
@@ -137,221 +185,29 @@ function M.configure_highlights(overrides, transparent)
         ['@text.emphasis']               = { italic = true },
         ['@type.qualifier']              = { link = 'Keyword' },
 
+        -- Markdown
         markdownCode                     = { fg = c.foreground_darker },
         markdownCodeDelimiter            = { fg = c.foreground_darker },
 
+        -- Vim
         vimOption                        = { fg = c.yellow },
 
+        -- Mkd
         mkdHeading                       = { fg = c.green },
         mkdListItem                      = { fg = c.cyan },
         mkdCode                          = { fg = c.foreground_darker },
         mkdCodeDelimiter                 = { fg = c.foreground_darker },
 
+        -- Diff
         diffAdded                        = { fg = c.green },
         diffRemoved                      = { fg = c.red },
-
-        CmpDocumentation                 = { bg = c.background_darker },
-        CmpItemAbbrDefault               = { fg = c.foreground },
-
-        CmpItemAbbr                      = { fg = c.foreground },
-        CmpItemAbbrDeprecated            = { fg = c.foreground_darker, strikethrough = true },
-        CmpItemAbbrMatch                 = { fg = c.blue },
-        CmpItemAbbrMatchFuzzy            = { fg = c.blue },
-
-        CmpItemMenu                      = { fg = c.comments },
-
-        CmpItemKindDefault               = { fg = c.foreground_darker },
-
-        CmpItemKindKeyword               = { fg = c.purple },
-        CmpItemKindReference             = { fg = c.purple },
-        CmpItemKindValue                 = { fg = c.purple },
-        CmpItemKindVariable              = { fg = c.purple },
-
-        CmpItemKindConstant              = { fg = c.orange },
-        CmpItemKindEnum                  = { fg = c.orange },
-        CmpItemKindEnumMember            = { fg = c.orange },
-        CmpItemKindOperator              = { fg = c.orange },
-        CmpItemKindField                 = { fg = c.orange },
-
-        CmpItemKindFunction              = { fg = c.blue },
-        CmpItemKindMethod                = { fg = c.blue },
-
-        CmpItemKindConstructor           = { fg = c.yellow },
-        CmpItemKindClass                 = { fg = c.yellow },
-        CmpItemKindInterface             = { fg = c.yellow },
-        CmpItemKindStruct                = { fg = c.yellow },
-        CmpItemKindEvent                 = { fg = c.yellow },
-        CmpItemKindUnit                  = { fg = c.yellow },
-        CmpItemKindFile                  = { fg = c.yellow },
-        CmpItemKindFolder                = { fg = c.yellow },
-
-        CmpItemKindModule                = { fg = c.green },
-        CmpItemKindProperty              = { fg = c.green },
-        CmpItemKindTypeParameter         = { fg = c.green },
-        CmpItemKindSnippet               = { fg = c.green },
-        CmpItemKindText                  = { fg = c.green },
-
-        TelescopeNormal                  = { bg = c.background_darker },
-        TelescopeBorder                  = { fg = c.background_darker, bg = c.background_darker },
-        TelescopeMatching                = { fg = c.blue },
-        TelescopePromptNormal            = { bg = c.references },
-        TelescopePromptBorder            = { fg = c.references, bg = c.references },
-        TelescopePromptTitle             = { bg = c.references },
-        TelescopePromptPrefix            = { fg = c.blue },
-        TelescopeSelectionCaret          = { fg = c.blue, bg = c.highlight },
-        TelescopeSelection               = { bg = c.references },
-
-        NvimTreeRootFolder               = { fg = c.green },
-        NvimTreeGitDirty                 = { fg = c.green },
-
-        NotifyERRORBorder                = { fg = c.dark_red },
-        NotifyERRORIcon                  = { fg = c.red },
-        NotifyERRORTitle                 = { fg = c.red },
-        NotifyWARNBorder                 = { fg = c.dark_orange },
-        NotifyWARNIcon                   = { fg = c.orange },
-        NotifyWARNTitle                  = { fg = c.orange },
-        NotifyINFOBorder                 = { fg = c.dark_green },
-        NotifyINFOIcon                   = { fg = c.green },
-        NotifyINFOTitle                  = { fg = c.green },
-        NotifyDEBUGBorder                = { fg = c.foreground_darker },
-        NotifyDEBUGIcon                  = { fg = c.foreground_darker },
-        NotifyDEBUGTitle                 = { fg = c.foreground_darker },
-        NotifyLogTitle                   = { fg = c.yellow },
-        NotifyBackground                 = { bg = c.background },
-
-        LazyNormal                       = { bg = c.background_darker },
-        LazyProgressDone                 = { fg = c.purple, bold = true },
-
-        LirDir                           = { fg = c.blue },
-        LirEmptyDirText                  = { bg = c.highlight },
-        CursorLineLir                    = { bg = c.highlight },
-
-        NoiceCmdlinePopup                = { bg = 'NONE' },
-        NoiceCmdlineIcon                 = { fg = c.purple },
-        NoiceCmdlinePopupBorder          = { fg = c.softblue },
-        NoiceMini                        = { bg = c.background_darker },
-
-        LuasnipChoice                    = { fg = c.orange },
-        LuasnipInsert                    = { fg = c.cyan },
-
-        DevIconC                         = { fg = c.cyan },
-        DevIconCpp                       = { fg = c.cyan },
-        DevIconGo                        = { fg = c.cyan },
-        DevIconTs                        = { fg = c.cyan },
-        DevIconLua                       = { fg = c.blue },
-        DevIconDart                      = { fg = c.blue },
-        DevIconJs                        = { fg = c.yellow },
-        DevIconPy                        = { fg = c.yellow },
-        DevIconCss                       = { fg = c.yellow },
-        DevIconJson                      = { fg = c.yellow },
-        DevIconJava                      = { fg = c.red },
-        DevIconRb                        = { fg = c.red },
-        DevIconRs                        = { fg = c.red },
-        DevIconMd                        = { fg = c.red },
-        DevIconHtml                      = { fg = c.red },
-        DevIconMakefile                  = { fg = c.red },
-        DevIconRed                       = { fg = c.red },
-        DevIconHs                        = { fg = c.purple },
-        DevIconPhp                       = { fg = c.purple },
-        DevIconH                         = { fg = c.purple },
-        DevIconSh                        = { fg = c.green },
-        DevIconBash                      = { fg = c.green },
-        DevIconVim                       = { fg = c.green },
-        DevIconVue                       = { fg = c.green },
-        DevIconTerminal                  = { fg = c.green },
-        DevIconDiff                      = { fg = c.orange },
-        DevIconConf                      = { fg = c.orange },
-        DevIconToml                      = { fg = c.orange },
-        DevIconKotlin                    = { fg = c.orange },
-        DevIconSwift                     = { fg = c.orange },
-
-        RainbowDelimiterRed              = { fg = c.red },
-        RainbowDelimiterYellow           = { fg = c.yellow },
-        RainbowDelimiterBlue             = { fg = c.blue },
-        RainbowDelimiterOrange           = { fg = c.orange },
-        RainbowDelimiterGreen            = { fg = c.green },
-        RainbowDelimiterPurple           = { fg = c.purple },
-        RainbowDelimiterCyan             = { fg = c.cyan },
-
-        IblIndent                        = { fg = c.disabled },
-        IblScope                         = { fg = c.statusline },
-
-        BlinkCmpMenu                     = { fg = c.disabled },
-        BlinkCmpMenuBorder               = { fg = c.background_darker, bg = c.background },
-        BlinkCmpMenuSelection            = { bg = c.selection },
-        BlinkCmpLabel                    = { fg = c.foreground },
-        BlinkCmpGhostText                = { fg = '#414868' },
-        BlinkCmpLabelMatch               = { fg = c.orange, bold = true },
-        BlinkCmpLabelDetail              = { link = "BlinkCmpLabel" },
-        BlinkCmpLabelDescription         = { link = "BlinkCmpLabel" },
-        BlinkCmpSource                   = { fg = c.disabled },
-        BlinkCmpDocBorder                = { link = "BlinkCmpMenuBorder" },
-        BlinkCmpSignatureHelpBorder      = { link = "BlinkCmpMenuBorder" },
-
-        BlinkCmpLabelDeprecated          = { fg = c.foreground_darker, strikethrough = true },
-
-        BlinkCmpKind                     = { fg = c.blue },
-        BlinkCmpKindText                 = { fg = c.comments },
-        BlinkCmpKindMethod               = { fg = c.blue },
-        BlinkCmpKindFunction             = { fg = c.blue },
-        BlinkCmpKindContructor           = { fg = c.blue },
-        BlinkCmpKindField                = { fg = c.cyan },
-        BlinkCmpKindVariable             = { fg = c.paleblue },
-        BlinkCmpKindValue                = { fg = c.paleblue },
-        BlinkCmpKindConstant             = { fg = c.yellow },
-        BlinkCmpKindClass                = { fg = c.yellow },
-        BlinkCmpKindStruct               = { fg = c.yellow },
-        BlinkCmpKindInterface            = { fg = c.yellow },
-        BlinkCmpKindModule               = { fg = c.orange },
-        BlinkCmpKindProperty             = { fg = c.purple },
-        BlinkCmpKindKeyword              = { fg = c.purple },
-        BlinkCmpKindUnit                 = { fg = c.green },
-        BlinkCmpKindFile                 = { fg = c.yellow },
-        BlinkCmpKindFolder               = { fg = c.yellow },
-        BlinkCmpKindSnippet              = { fg = c.green },
-        BlinkCmpKindEvent                = { fg = c.blue },
-        BlinkCmpKindTypeParameter        = { fg = c.blue },
-        BlinkCmpKindCopilot              = { fg = c.dark_blue },
-        BlinkCmpKindColor                = { fg = c.red },
-
-        MasonHeader                      = { fg = 'NONE', bg = 'NONE', bold = true },
-        MasonHeaderSecondary             = { fg = c.foreground_darker, bg = c.background_darker, bold = true },
-        MasonHighlight                   = { fg = c.green },
-        MasonHighlightBlock              = { fg = c.paleblue, bg = c.green },
-        MasonHighlightBlockBold          = { bg = c.background_darker, fg = c.foreground_darker, bold = true },
-        MasonHighlightSecondary          = { fg = c.purple },
-        MasonHighlightBlockSecondary     = { fg = c.foreground_darker, bg = c.background_darker },
-        MasonHighlightBlockBoldSecondary = { fg = c.foreground, bg = c.background, bold = true },
-        MasonError                       = { fg = c.red },
-        MasonHeading                     = { fg = c.purple, bold = true },
-
-        MiniIndentscopeSymbol            = { fg = c.blue, nocombine = true },
-        MiniIndentscopePrefix            = { nocombine = true },
-
-        FzfLuaBorder                     = { fg = c.blue },
-        FzfLuaTitle                      = { fg = c.blue },
-        FzfLuaHeaderBind                 = { fg = c.yellow },
-        FzfLuaHeaderText                 = { fg = c.orange },
-        FzfLuaDirPart                    = { link = "NonText" },
-        FzfLuaFzfPointer                 = { fg = c.purple },
-        FzfLuaFzfMatch                   = { fg = c.blue },
-        FzfLuaFzfPrompt                  = { fg = c.blue },
-        FzfLuaPathColNr                  = { fg = c.blue },
-        FzfLuaPathLineNr                 = { fg = c.green },
-        FzfLuaBufName                    = { fg = c.purple },
-        FzfLuaBufNr                      = { fg = c.yellow },
-        FzfLuaBufFlagCur                 = { fg = c.orange },
-        FzfLuaBufFlagAlt                 = { fg = c.blue },
-        FzfLuaTabTitle                   = { fg = c.paleblue },
-        FzfLuaTabMarker                  = { fg = c.yellow },
-        FzfLuaLiveSym                    = { fg = c.orange },
-
-        TroubleText                      = { fg = c.foreground_darker },
-        TroubleCount                     = { fg = c.purple },
-        TroubleNormal                    = { fg = c.foreground },
     }
 
-    M.highlights = vim.tbl_deep_extend('force', default_highlights, overrides or {})
+    -- Load plugin highlights
+    local plugin_highlights = plugin_loader.load_plugin_highlights(c, enabled_plugins)
+
+    -- Merge all highlights
+    M.highlights = vim.tbl_deep_extend('force', core_highlights, plugin_highlights, overrides or {})
 end
 
 function M.setup(opts)
@@ -361,12 +217,38 @@ function M.setup(opts)
         vim.cmd("hi clear")
     end
 
+
+
     vim.o.termguicolors = true
     vim.g.colors_name = 'lucidplasma'
     vim.api.nvim_set_hl(0, "EndOfBuffer", { fg = M.colors.background })
 
-    M.configure_highlights({}, opts.transparent)
+    vim.g.terminal_color_0  = '#292D3E'
+    vim.g.terminal_color_1  = '#f66575'
+    vim.g.terminal_color_2  = '#b8e9a4'
+    vim.g.terminal_color_3  = '#ffcf75'
+    vim.g.terminal_color_4  = '#2ac3de'
+    vim.g.terminal_color_5  = '#D49BFD'
+    vim.g.terminal_color_6  = '#86c4ff'
+    vim.g.terminal_color_7  = '#c0caf5'
+    vim.g.terminal_color_8  = '#474747'
+    vim.g.terminal_color_9  = '#f07178'
+    vim.g.terminal_color_10 = '#7d9367'
+    vim.g.terminal_color_11 = '#eb7d57'
+    vim.g.terminal_color_12 = '#5970a6'
+    vim.g.terminal_color_13 = '#bb80b3'
+    vim.g.terminal_color_14 = '#89dceb'
+    vim.g.terminal_color_15 = '#ffffff'
 
+    -- Configure colors if provided
+    if opts.colors then
+        M.configure_colors(opts.colors)
+    end
+
+    -- Configure highlights
+    M.configure_highlights(opts.highlights, opts.transparent, opts.plugins)
+
+    -- Apply all highlights
     for group, hls in pairs(M.highlights) do
         highlight(group, hls)
     end
